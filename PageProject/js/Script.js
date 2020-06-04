@@ -212,115 +212,74 @@ window.addEventListener('DOMContentLoaded', () => {
     ).render();
 
 // Forms
-    const forms = document.querySelectorAll('form'); // получаем форму
-    const message = { // задаем сообщения
-        loading: '/img/form/spinner.svg',
-        success: 'Спасибо! Скоро мы с вами свяжемся',
-        failure: 'Что-то пошло не так...'
-    };
+const forms = document.querySelectorAll('form');
+const message = {
+    loading: 'img/form/spinner.svg',
+    success: 'Спасибо! Скоро мы с вами свяжемся',
+    failure: 'Что-то пошло не так...'
+};
 
-    forms.forEach(item => {
-        postData(item); //
-    }); 
+forms.forEach(item => {
+    postData(item);
+});
 
-    function postData(form) { 
-        form.addEventListener('submit', (e) => { // навешиваем событие на форму
-            e.preventDefault();
+function postData(form) {
+    form.addEventListener('submit', (e) => {
+        e.preventDefault();
 
-            let statusMessage = document.createElement('img'); // создаем новый элемент, в который будем помещать сообщение
-            statusMessage.src = message.loading; // добавляем класс статус к тегу
-            statusMessage.style.cssText = `
+        let statusMessage = document.createElement('img');
+        statusMessage.src = message.loading;
+        statusMessage.style.cssText = `
             display: block;
             margin: 0 auto;
-            `; // добавляем статус загрузка...
-            form.appendAdjacentElement('afterend', statusMessage); // передаем объект на страницу
-        
-            //XMLHttpRequest
-            // const request = new XMLHttpRequest(); // создаем ajax-запрос
-            // request.open('POST', 'server.php'); // метод, обработчик
-            // request.setRequestHeader('Content-type', 'application/json; charset=utf-8'); // при работе с json-форматом обязательно указываем заголовок
-            const formData = new FormData(form); // создаем новый объект - сбощик данных из формы (получаем псевдомассив)
-            const object = {}; // переводbм псевдомассив в обычный массив
-            formData.forEach(function(value, key){
-                object[key] = value;
-            });
-
-           // request.send(json); // отправляем запрос 
-
-            // request.addEventListener('load', () => { // отслеживаем событие
-            //     if (request.status === 200) { // проверяем статус запроса
-            //         console.log(request.response); // выводим в консоль сообщение об обработке статуса запроса (200 -ок)
-            //         showThanksModal(message.success); //выводим статус 
-            //         form.reset(); // сбрасываем поля формы
-            //         statusMessage.remove();
-
-            //     } else {
-            //         showThanksModal(message.failure); // если не ок выводим ошибку
-            //     }
-            // });
-            //Fetch
-
-            fetch('server.php', {
-                method: "POST",
-                headers: {
-                    'content-type': 'application/json; charset=utf-8'
-                },
-                body: JSON.stringify(object)
-                })
-                .then(data => data.text()) // преобразуем данные в читаемый формат
-                .then(data => {
-                    console.log(data); // выводим в консоль сообщение об обработке статуса запроса (200 -ок)
-                    showThanksModal(message.success); //выводим статус 
-                    statusMessage.remove();
-                })
-                .catch(() => {
-                    showThanksModal(message.failure); // если не ок выводим ошибку
-                }).finally(() => {
-                    form.reset(); // сбрасываем поля формы
-                });
-
-
-        });
-    }
-
-    function showThanksModal(message) {
-        const prevModalDialog = document.querySelector('.modal__dialog');
-
-        prevModalDialog.classList.add('hide');
-        openModal();
-
-        const thanksModal = document.createElement('div');
-        thanksModal.classList.add('modal__dialog');
-        thanksModal.innerHTML = `
-            <div class="modal__content">
-                <div class="modal__close" data-close>x/div>
-                <div class="modal__title">${message}</div>
-            </div>
-            `;
-
-        document.querySelector('.modal').append(thanksModal);
-        
-        setTimeout(() => {
-            thanksModal.remove();
-            prevModalDialog.classList.add('show');
-            prevModalDialog.classList.remove('hide');
-            closeModal();
-        }, 4000);
-    }
-
-    // fetch('https://jsonplaceholder.typicode.com/todos/1') //get запрос
-    //     .then(response => response.json())
-    //     . then(json => console.log(json));
-
-    //     fetch('https://jsonplaceholder.typicode.com/posts', {
-    //         method: POST,
-    //         body: JSON.stringify({name: Alex}),
-    //         headers: {
-    //             'content-type': 'application/json'
-    //         }
-    //     }) //post запрос
-    //     .then(response => response.json())
-    //     . then(json => console.log(json));
-
+        `;
+        form.insertAdjacentElement('afterend', statusMessage);
     
+        const formData = new FormData(form);
+
+        const object = {};
+        formData.forEach(function(value, key){
+            object[key] = value;
+        });
+
+        fetch('server.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(object)
+        }).then(data => {
+            console.log(data);
+            showThanksModal(message.success);
+            statusMessage.remove();
+        }).catch(() => {
+            showThanksModal(message.failure);
+        }).finally(() => {
+            form.reset();
+        });
+    });
+}
+
+function showThanksModal(message) {
+    const prevModalDialog = document.querySelector('.modal__dialog');
+
+    prevModalDialog.classList.add('hide');
+    openModal();
+
+    const thanksModal = document.createElement('div');
+    thanksModal.classList.add('modal__dialog');
+    thanksModal.innerHTML = `
+        <div class="modal__content">
+            <div class="modal__close" data-close>×</div>
+            <div class="modal__title">${message}</div>
+        </div>
+    `;
+    document.querySelector('.modal').append(thanksModal);
+    setTimeout(() => {
+        thanksModal.remove();
+        prevModalDialog.classList.add('show');
+        prevModalDialog.classList.remove('hide');
+        closeModal();
+    }, 4000);
+}
 });
